@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis.Options;
 using Microsoft.EntityFrameworkCore;
 using WebApplicationsebas.Context;
+using WebApplicationsebas.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,8 @@ builder.Services.AddDbContext<SebasContext>((options) =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("ValenzuelaConexion"));
 
 });
+builder.Services.Configure<AzureStorageConfig>(builder.Configuration.GetSection("AzureStorage"));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
