@@ -8,7 +8,7 @@ namespace WebApplicationsebas.Context
         public SebasContext(DbContextOptions<SebasContext>contextOptions): base(contextOptions)
         {
         }
-        public DbSet<Conductor> Conductor { get; set; }
-        public DbSet<Automovil> Automovil {  get; set; }
+        public DbSet<Conductor> Conductores { get; set; }
+        public DbSet<Automovil> Automoviles {  get; set; }
     }
 }

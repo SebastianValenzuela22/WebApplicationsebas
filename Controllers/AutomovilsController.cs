@@ -7,33 +7,39 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApplicationsebas.Context;
 using WebApplicationsebas.Models;
+using Microsoft.Extensions.Options;
+using WebApplicationsebas.Helpers;
+
 
 namespace WebApplicationsebas.Controllers
 {
     public class AutomovilsController : Controller
     {
         private readonly SebasContext _context;
+        private readonly AzureStorageConfig _config;
 
-        public AutomovilsController(SebasContext context)
+        public AutomovilsController(SebasContext context, IOptions<AzureStorageConfig>config)
         {
             _context = context;
+            _config = config.Value;
         }
 
         // GET: Automovils
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Automovil.ToListAsync());
+            //lineas cambiadas
+            return View(await _context.Automoviles.Include(e=> e.conductor).ToListAsync());
         }
 
         // GET: Automovils/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
+            if (id == null || _context.Automoviles == null)
             {
                 return NotFound();
             }
 
-            var automovil = await _context.Automovil
+            var automovil = await _context.Automoviles.Include(e=>e.conductor)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (automovil == null)
             {
@@ -44,8 +50,10 @@ namespace WebApplicationsebas.Controllers
         }
 
         // GET: Automovils/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
+            var conductores = await _context.Conductores.ToListAsync();
+            ViewBag.conductor = new SelectList(conductores, "Id", "NombreConductor");
             return View();
         }
 
@@ -54,11 +62,23 @@ namespace WebApplicationsebas.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Modelo,Año,Foto")] Automovil automovil)
+        public async Task<IActionResult> Create([Bind("Id,Modelo,Año,Foto,conductor")] Automovil automovil, IFormFile foto)
         {
-            if (ModelState.IsValid)
+            if ("Modelo,Año,Foto,Conductor.Id".Split(',').All(campo=>ModelState.ContainsKey(campo)))
             {
-                _context.Add(automovil);
+                if(foto == null)
+                {
+                    automovil.Foto = StorageHelper.URL_Imagen_default;
+                }
+                else
+                {
+                    string extension = foto.FileName.Split(",")[1];
+                    string nombre = $"{Guid.NewGuid()}.{extension}";
+                    automovil.Foto = await StorageHelper.SubirArchivo(foto.OpenReadStream(), nombre, _config);
+
+                }
+                _context.Set<Automovil>().Add(automovil);
+                _context.Entry(automovil.conductor).State = EntityState.Unchanged;
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -73,7 +93,7 @@ namespace WebApplicationsebas.Controllers
                 return NotFound();
             }
 
-            var automovil = await _context.Automovil.FindAsync(id);
+            var automovil = await _context.Automoviles.FindAsync(id);
             if (automovil == null)
             {
                 return NotFound();
@@ -119,12 +139,12 @@ namespace WebApplicationsebas.Controllers
         // GET: Automovils/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
+            if (id == null || _context.Automoviles == null)
             {
                 return NotFound();
             }
 
-            var automovil = await _context.Automovil
+            var automovil = await _context.Automoviles.Include(e=>e.conductor)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (automovil == null)
             {
@@ -139,10 +159,15 @@ namespace WebApplicationsebas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var automovil = await _context.Automovil.FindAsync(id);
+            if (_context.Automoviles == null)
+            {
+                return Problem("Entity set 'jaragongcontext.Automoviles' is null.");
+            }
+
+            var automovil = await _context.Automoviles.FindAsync(id);
             if (automovil != null)
             {
-                _context.Automovil.Remove(automovil);
+                _context.Automoviles.Remove(automovil);
             }
 
             await _context.SaveChangesAsync();
@@ -151,7 +176,7 @@ namespace WebApplicationsebas.Controllers
 
         private bool AutomovilExists(int id)
         {
-            return _context.Automovil.Any(e => e.Id == id);
+            return (_context.Automoviles?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

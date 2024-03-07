@@ -22,7 +22,7 @@ namespace WebApplicationsebas.Controllers
         // GET: Conductors
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Conductor.ToListAsync());
+            return View(await _context.Conductores.ToListAsync());
         }
 
         // GET: Conductors/Details/5
@@ -33,7 +33,7 @@ namespace WebApplicationsebas.Controllers
                 return NotFound();
             }
 
-            var conductor = await _context.Conductor
+            var conductor = await _context.Conductores
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (conductor == null)
             {
@@ -73,7 +73,7 @@ namespace WebApplicationsebas.Controllers
                 return NotFound();
             }
 
-            var conductor = await _context.Conductor.FindAsync(id);
+            var conductor = await _context.Conductores.FindAsync(id);
             if (conductor == null)
             {
                 return NotFound();
@@ -124,7 +124,7 @@ namespace WebApplicationsebas.Controllers
                 return NotFound();
             }
 
-            var conductor = await _context.Conductor
+            var conductor = await _context.Conductores
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (conductor == null)
             {
@@ -139,10 +139,10 @@ namespace WebApplicationsebas.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var conductor = await _context.Conductor.FindAsync(id);
+            var conductor = await _context.Conductores.FindAsync(id);
             if (conductor != null)
             {
-                _context.Conductor.Remove(conductor);
+                _context.Conductores.Remove(conductor);
             }
 
             await _context.SaveChangesAsync();
@@ -151,7 +151,7 @@ namespace WebApplicationsebas.Controllers
 
         private bool ConductorExists(int id)
         {
-            return _context.Conductor.Any(e => e.Id == id);
+            return _context.Conductores.Any(e => e.Id == id);
         }
     }
 }
