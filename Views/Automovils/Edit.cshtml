@@ -4,41 +4,84 @@
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit</h1>
+<div class="container">
+    <h1 class="my-4 text-center text-uppercase" style="color: #2c3e50;">Editar Automóvil</h1>
 
-<h4>Automovil</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Modelo" class="control-label"></label>
-                <input asp-for="Modelo" class="form-control" />
-                <span asp-validation-for="Modelo" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Año" class="control-label"></label>
-                <input asp-for="Año" class="form-control" />
-                <span asp-validation-for="Año" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Foto" class="control-label"></label>
-                <input asp-for="Foto" class="form-control" />
-                <span asp-validation-for="Foto" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <form asp-action="Edit" enctype="multipart/form-data" class="shadow p-4 mb-4 bg-white rounded">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+
+                <div class="form-group">
+                    <label asp-for="Modelo" class="control-label"></label>
+                    <input asp-for="Modelo" class="form-control" />
+                    <span asp-validation-for="Modelo" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Año" class="control-label"></label>
+                    <input asp-for="Año" class="form-control" />
+                    <span asp-validation-for="Año" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Foto" class="control-label"></label>
+                    
+                    <input asp-for="Foto" class="form-control"/>
+                    
+                    <img id="foto-perfil" class="perfil-foto mt-2" src="@Model.Foto" alt="Foto del automóvil" width="100" height="100">
+                    <div class="form-group form-crear-automovil-archivo mt-2">
+                        <input name="Foto" class="form-control" id="nueva-foto" type="file" />
+                    </div>
+                    <span asp-validation-for="Foto" class="text-danger"></span>
+                </div>
+
+                <div class="form-group form-crear-automovil-conductor">
+                    <label class="control-label">Conductor</label>
+                    @if (ViewBag.conductor != null && ViewBag.conductor is SelectList && (ViewBag.conductor as SelectList).Count() > 0)
+                    {
+                        @Html.DropDownList("Conductor.Id", ViewBag.conductor as SelectList)
+                    }
+                    else
+                    {
+                        <select>
+                            <option disabled selected>No hay conductores disponibles</option>
+                        </select>
+                    }
+
+
+                </div>
+
+                <div class="form-group">
+                    <input type="submit" value="Guardar" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a asp-action="Index" class="btn btn-secondary">Volver a la lista</a>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        window.addEventListener('load', () => {
+            let foto_perfil = document.getElementById('foto-perfil');
+            let reader = new FileReader();
+            let input = document.getElementById('nueva-foto');
+            input.addEventListener('input', (e) => {
+                reader.readAsDataURL(input.files[0]);
+            });
+            reader.onload = (e) => {
+                foto_perfil.setAttribute('src', e.target.result);
+            };
+        });
+    </script>
+    
 }

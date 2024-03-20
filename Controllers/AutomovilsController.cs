@@ -9,6 +9,7 @@ using WebApplicationsebas.Context;
 using WebApplicationsebas.Models;
 using Microsoft.Extensions.Options;
 using WebApplicationsebas.Helpers;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 
 namespace WebApplicationsebas.Controllers
@@ -72,7 +73,7 @@ namespace WebApplicationsebas.Controllers
                 }
                 else
                 {
-                    string extension = foto.FileName.Split(",")[1];
+                    string extension = foto.FileName.Split(",")[0];
                     string nombre = $"{Guid.NewGuid()}.{extension}";
                     automovil.Foto = await StorageHelper.SubirArchivo(foto.OpenReadStream(), nombre, _config);
 
@@ -88,17 +89,19 @@ namespace WebApplicationsebas.Controllers
         // GET: Automovils/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
+            if (id == null || _context.Automoviles == null)
             {
                 return NotFound();
             }
 
-            var automovil = await _context.Automoviles.FindAsync(id);
-            if (automovil == null)
+            var conductores = await _context.Conductores.ToListAsync();
+            ViewBag.conductor = new SelectList(conductores, "Id", "NombreConductor");
+            var Automovil = await _context.Automoviles.FindAsync(id);
+            if (Automovil == null)
             {
                 return NotFound();
             }
-            return View(automovil);
+            return View(Automovil);
         }
 
         // POST: Automovils/Edit/5
@@ -106,17 +109,35 @@ namespace WebApplicationsebas.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Modelo,Año,Foto")] Automovil automovil)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Modelo,Año,Foto,conductor")] Automovil automovil , IFormFile foto)
         {
             if (id != automovil.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if ("Modelo,Año,Foto,Conductor.Id".Split(',').All(campo => ModelState.ContainsKey(campo)))
             {
+                var datos = await _context.Conductores.FindAsync(automovil.conductor.Id);
+                automovil.conductor = datos;
                 try
                 {
+                    if (foto == null)
+                    {
+                        //automovil.Foto = automovil.Foto;
+                       //automovil.Foto = StorageHelper.URL_Imagen_default;
+                      // string extension = foto.FileName.Split(",")[1];
+                      // string nombre = $"{Guid.NewGuid()}.{extension}";
+                      // automovil.Foto = await StorageHelper.SubirArchivo(foto.OpenReadStream(), nombre, _config);
+                        
+                    }
+                    else
+                    {
+                        string extension = foto.FileName.Split(",")[0];
+                        string nombre = $"{Guid.NewGuid()}.{extension}";
+                        automovil.Foto = await StorageHelper.SubirArchivo(foto.OpenReadStream(), nombre, _config);
+                    }
+                    
                     _context.Update(automovil);
                     await _context.SaveChangesAsync();
                 }
@@ -135,6 +156,8 @@ namespace WebApplicationsebas.Controllers
             }
             return View(automovil);
         }
+
+
 
         // GET: Automovils/Delete/5
         public async Task<IActionResult> Delete(int? id)
