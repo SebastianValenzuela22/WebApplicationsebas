@@ -1,16 +1,16 @@
 ﻿@model WebApplicationsebas.Models.Automovil
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "CREATE";
 }
 
-<h1>Create</h1>
+<h1 style="color: #3498db;"> Añadir automovil</h1>
 
-<h4>Automovil</h4>
+<h4 style="color: #2c3e50;">Automovil</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create" enctype="multipart/form-data">
+        <form asp-action="Create" enctype="multipart/form-data" style="background-color: #f8f9fa; padding: 20px; border-radius: 15px;">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Modelo" class="control-label"></label>
@@ -23,35 +23,38 @@
                 <span asp-validation-for="Año" class="text-danger"></span>
             </div>
 
-           <!---->
+            <!---->
 
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
+           
             <!-- Lineas agregadas el 29 de feb-->
             <div class="form-group form-crear-automovil-foto">
-                <img id="foto-perfil" class="perfil-foto" src="https://cuentavalenzuela.blob.core.windows.net/contenedorvalenzuela01/usuario.png" />
+                <img id="foto-perfil" class="perfil-foto" src="https://cuentavalenzuela.blob.core.windows.net/contenedorvalenzuela01/usuario.png" width="150px" height="150px" />
 
             </div>
-            <div class = "form-group form-crear-automovil-archivo">
-                <input name="Foto" class="form-control" id="archivo" type="file"/>
+            <div class="form-group form-crear-automovil-archivo">
+                <input name="Foto" class="form-control" id="archivo" type="file" />
 
             </div>
-            <div class = "form-group form-crear-automovil-conductor">
+            <div class="form-group form-crear-automovil-conductor">
                 <label class="control-label">Conductor</label>
 
-                
-               @if((ViewBag.conductor as SelectList).Count()>0){
-                   @Html.DropDownList("Conductor.Id",ViewBag.conductor as SelectList)
-               }
-              else
-               @if((ViewBag.conductor as SelectList).Count()==0){
-                   <select required disabled></select>
 
-      
-               }
-               <span asp-validation-for="conductor.Id" class="text-danger"></span>
+                @if ((ViewBag.conductor as SelectList).Count() > 0)
+                {
+                    @Html.DropDownList("Conductor.Id", ViewBag.conductor as SelectList)
+                }
+                else
+                @if ((ViewBag.conductor as SelectList).Count() == 0)
+                {
+                    <select required disabled></select>
 
+
+                }
+                <span asp-validation-for="conductor.Id" class="text-danger"></span>
+
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Añadir" class="btn btn-primary" />
             </div>
         </form>
     </div>
@@ -62,7 +65,9 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
     <script>
         window.addEventListener('load', () => {
             console.log('loaded');
